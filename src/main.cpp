@@ -16,7 +16,6 @@ void setup() {
   pinMode(PIN_PULSE, OUTPUT);            // first: output and LOW before anything else
   digitalWrite(PIN_PULSE, LOW);
   pinMode(PIN_LED, OUTPUT);
-  digitalWrite(PIN_LED, LOW);
   clusterStart = millis() + QUIET_MS;
 }
 

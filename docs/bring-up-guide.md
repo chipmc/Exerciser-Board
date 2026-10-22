@@ -91,7 +91,7 @@ Use Arduino IDE 1.8.13 with the adapter still connected and the board powered fr
 
 The burn log on board 1 showed these fuse writes: `0:0x00 1:0x00 2:0x01 5:0b11111110 6:0x04 7:0x00 8:0x02`. That means 16 MHz (OSCCFG 0x01), PB4 as alternate reset (SYSCFG0 0xFE), 8ms startup (SYSCFG1 0x04) and a 512-byte boot section (BOOTEND 0x02). It then erased the chip, wrote 472 bytes of bootloader and ended with "Verify successful".
 
-After the burn, the fuses should read `00 00 01 FF FF FE 04 00 02`. On board 1 this was taken from the burn log and not read back, so confirm it with the read command from Step 2.
+After the burn, the fuses should read `00 00 01 FF FF FE 04 00 02`. Boards 1 to 3 all read back exactly this on 22 Oct 2026 (the unused bytes after the nine fuses print as `xx`), so the burn does write the fuses.
 
 Once the bootloader is in, Upload Using Programmer is refused on Optiboot boards. Every later sketch goes over serial.
 
@@ -203,21 +203,43 @@ Run these with the first sketch loaded. Board 1 passed everything marked confirm
 
 For the idle current, use the first sketch (the pulsed LED). The second sketch holds the LED on, which adds about 2 mA.
 
-## Step 6: Move development to PlatformIO (not yet tried)
+Boards 2 and 3 (22 Oct 2026): bootloader burned, fuses read back correctly, and a simple sketch uploaded over serial from the Arduino IDE on all three boards 1 to 3. The PlatformIO upload has not been tried yet.
 
-The goal is VS Code with PlatformIO for editing, building and the serial monitor. Keep Arduino IDE 1.8.13 for the one-time bootloader burn. Until a PlatformIO upload has worked on a board, paste the sketch into the Arduino IDE and upload from there.
+## Step 6: Develop in PlatformIO
 
-What is known: a PlatformIO forum thread builds an ATtiny3226 with `platform = atmelmegaavr`, `framework = arduino`, `board = ATtiny3226` and `board_build.core = megaTinyCore`, but it uploads over UPDI with pymcuprog and no bootloader. No documented PlatformIO setup was found that uploads through the Optiboot bootloader on this chip, so the upload line in `platformio.ini` is a plan, not a tested recipe.
+VS Code with PlatformIO builds and uploads through the bootloader on board 1 (confirmed 22 Oct 2026: build, upload and verify work, and the V1 pulse pattern runs). Keep Arduino IDE 1.8.13 for the one-time bootloader burn.
 
-1. In the Arduino IDE, turn on verbose output for uploads (File, Preferences), upload a sketch once, and copy the avrdude command it prints. (Done on board 1.)
-2. Put that command in `platformio.ini` as a custom upload command, with `$SOURCE` for the hex file and `$UPLOAD_PORT` for the port.
-3. Match the build settings to what the burn wrote: 16 MHz, internal oscillator, brown-out detector disabled. PlatformIO does not write fuses on upload.
+PlatformIO's default settings do not work for an Optiboot ATtiny3226. Each setting below is needed; the symptom without it is in brackets:
 
-The upload line is the command the Arduino IDE ran on board 1 (megaTinyCore 2.6.11, avrdude 6.3), with the port and hex path replaced by PlatformIO's variables. It has not been run from PlatformIO yet. The `-D` flag skips the chip erase, which is why the bootloader survives. PlatformIO builds from `src/main.cpp`, so a sketch needs `#include <Arduino.h>` at the top and its functions declared before use.
+- **Newer toolchain** (`platformio/toolchain-atmelavr@~3.70300.0`): the default avr-gcc has no device spec for the chip [error `device-specs/specs-attiny3226: No such file`].
+- **`-DCLOCK_SOURCE=0`**: tells megaTinyCore to use the internal oscillator [build error `CLOCK_SOURCE not defined`].
+- **`-Wl,--section-start=.text=0x200`**, plus `build_unflags` removing the builder's own `.text=0x0`: the program must start just past the 512-byte bootloader [avrdude verify fails at byte 0, and the hex file is 886 bytes instead of about 1398 because it starts at address 0].
+- **`-DUSING_OPTIBOOT`**: the Arduino IDE defines it for Optiboot boards. Without it the program sees the zeroed reset flags the bootloader leaves, resets itself, and loops before `setup()` runs [the LED never lights].
+
+```ini
+[env:ATtiny3226]
+platform = atmelmegaavr
+board = ATtiny3226
+framework = arduino
+board_build.core = megaTinyCore
+board_build.f_cpu = 16000000L
+board_hardware.oscillator = internal
+board_hardware.bod = disabled
+build_flags =
+    -DCLOCK_SOURCE=0
+    -Wl,--section-start=.text=0x200
+    -DUSING_OPTIBOOT
+build_unflags = -Wl,--section-start=.text=0x0
+platform_packages =
+    platformio/toolchain-atmelavr@~3.70300.0
+upload_protocol = custom
+upload_port = /dev/cu.usbserial-110
+upload_command = /Users/chipmc/Library/Arduino15/packages/DxCore/tools/avrdude/6.3.0-arduino17or18/bin/avrdude -C/Users/chipmc/Library/Arduino15/packages/megaTinyCore/hardware/megaavr/2.6.11/avrdude.conf -v -pattiny3226 -carduino -D -P$UPLOAD_PORT -b115200 -Uflash:w:$SOURCE:i
+```
+
+The upload line is the command the Arduino IDE ran on board 1, with the port and hex path replaced by PlatformIO's variables. The `-D` flag skips the chip erase, which is why the bootloader survives. It depends on the Arduino IDE's megaTinyCore 2.6.11 files, so keep that install. PlatformIO builds from `src/main.cpp`, so a sketch needs `#include <Arduino.h>` at the top and its functions declared before use. A normal Mac terminal does not have `pio` on its path; use "PlatformIO: New Terminal" in VS Code or `~/.platformio/penv/bin/pio`.
 
 Do not upload from PlatformIO over UPDI with pymcuprog on a board that has the bootloader. That path used `--erase` in the forum thread, which is a full chip erase and would remove the bootloader.
-
-If the custom upload does not work, a fallback is the Arduino command-line tool with megaTinyCore 2.6.11 driven from VS Code, so the core and bootloader flow match the Arduino IDE exactly. Also keep in mind that PlatformIO's packaged core may be older than 2.6.11, so check which version builds your sketches.
 
 ## Firmware plan for the exerciser
 
@@ -243,7 +265,7 @@ If the custom upload does not work, a fallback is the Arduino command-line tool 
 
 ## Not yet done
 
-- Read the fuses back after the bootloader burn and compare them with the expected `00 00 01 FF FF FE 04 00 02`.
+- Burn the bootloader on boards 4 and 5 and read their fuses back (boards 1 to 3 are done and matched).
 - Explain the brief 8 mA peaks: one LED channel should add only about 2 mA, so check for a meter peak-hold catching a reset or the bootloader window, or two channels on at once. The 2 mA steady reading is at 16 MHz and matches the design budget. At 1 MHz the datasheet's active-current numbers suggest roughly 0.3 to 0.6 mA (an estimate from the 5 MHz and 10 MHz table values, not measured); sleeping between pulses should save more than slowing the clock.
 - Measure IO1 and IO2 at J2 pins 5 and 6, and test the JP1 filter with a PWM ramp on IO2.
 - Write the serial command protocol, the pulse patterns and the `SENT n` reporting.
