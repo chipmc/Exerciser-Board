@@ -203,7 +203,7 @@ Run these with the first sketch loaded. Board 1 passed everything marked confirm
 
 For the idle current, use the first sketch (the pulsed LED). The second sketch holds the LED on, which adds about 2 mA.
 
-Boards 2 and 3 (22 Oct 2026): bootloader burned, fuses read back correctly, and a simple sketch uploaded over serial from the Arduino IDE on all three boards 1 to 3. The PlatformIO upload has not been tried yet.
+Status on 22 Oct 2026: boards 1 to 3 have the bootloader and correct fuses (boards 1 to 3 all read `00 00 01 FF FF FE 04 00 02`) and take serial uploads. The V1 pulse-pattern sketch uploads from PlatformIO and verifies (1704 bytes, the 0x200 offset plus 1192 bytes of code), and its LED sequence is identical on all three boards. Boards are marked 1, 2 and 3 in pen; board 3 is the test unit. Boards 4 and 5 are in Raleigh, for the colleague to bring up with the quickstart.
 
 ## Step 6: Develop in PlatformIO
 
