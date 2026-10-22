@@ -4,11 +4,12 @@
 // One 20-minute cycle, repeated forever: a cluster of pulses, then silence.
 // The LED shows where the counter should be in its occupancy session.
 //
-// Expected values:
-//   session   = (PULSES-1) x SPACING + DEBOUNCE = 9 x 30 + 60 = 330 s = 5.5 min
-//   per hour  = 3 sessions = 16.5 min
-//   per open day = whole cycles completed x 5.5 min
-//   tolerance = about +/-1 s per session (the counter credits whole seconds)
+// Expected values (documentation only; no code uses these numbers):
+//   session      = (PULSES-1) x SPACING + DEBOUNCE
+//   baseline (DEBOUNCE 300000): 9 x 30 + 300 = 570 s = 9.5 min; 3 per hour = 28.5 min;
+//                16 h day = 48 cycles x 9.5 = 456 min
+//   bench (DEBOUNCE 60000):     9 x 30 + 60  = 330 s = 5.5 min; 16.5 min per hour; 264 min per day
+//   tolerance    = about +/-1 s per session (the counter credits whole seconds)
 const uint8_t  PIN_PULSE = PIN_PA6;      // IO1, J2 pin 5: active-high, idle LOW
 const uint8_t  PIN_RED = PIN_PC3;        // LEDs: HIGH = on
 const uint8_t  PIN_GREEN = PIN_PC2;
@@ -18,13 +19,14 @@ const uint8_t  PULSES_PER_CLUSTER = 10;
 const uint32_t PULSE_HIGH_MS = 2000;
 const uint32_t PULSE_SPACING_MS = 30000; // pulse start to pulse start
 const uint32_t CYCLE_MS = 1200000;       // cluster start to next cluster start (20 min)
-// Must equal the counter's sensor.setting1. Used only for the LED session marker
-// and the expected-value comment; does not affect pulse timing.
-const uint32_t DEBOUNCE_MS = 60000;
+// Must equal the counter's sensor.setting1. Baseline is 300000 (production). 60000 is for
+// quick bench checks only. Used only for the LED session marker and the expected-value
+// comment; does not affect pulse timing.
+const uint32_t DEBOUNCE_MS = 300000;
 
 const uint32_t LAST_RISE_MS = (PULSES_PER_CLUSTER - 1) * PULSE_SPACING_MS;
-const uint32_t HEARTBEAT_START_MS =      // first spacing boundary after the session ends
-    ((LAST_RISE_MS + DEBOUNCE_MS) / PULSE_SPACING_MS + 1) * PULSE_SPACING_MS;
+const uint32_t HEARTBEAT_START_MS = LAST_RISE_MS + DEBOUNCE_MS + PULSE_SPACING_MS;
+static_assert(HEARTBEAT_START_MS < CYCLE_MS, "DEBOUNCE_MS too long for the cycle");
 
 uint32_t clusterStart;                   // absolute time (millis) of the current cluster
 
@@ -40,7 +42,7 @@ uint8_t ledPin(uint32_t pos) {
   uint32_t tl = pos - LAST_RISE_MS;                 // ms since the last rise
   if (tl < PULSE_HIGH_MS) return PIN_BLUE;
   if (tl < DEBOUNCE_MS) return (tl >= 5000 && tl % 5000 < 50) ? PIN_BLUE : 0;
-  if (pos >= HEARTBEAT_START_MS && r < 20) return PIN_RED;
+  if (pos >= HEARTBEAT_START_MS && (pos - HEARTBEAT_START_MS) % PULSE_SPACING_MS < 20) return PIN_RED;
   return 0;
 }
 
