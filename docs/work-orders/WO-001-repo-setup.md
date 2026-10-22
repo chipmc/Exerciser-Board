@@ -27,5 +27,11 @@ Put this project under git so we can track the bring-up guide, the PlatformIO co
 - Report back: the commit hash, the list of tracked files, and any `.gitignore` additions.
 
 ## Closing record (Claude Code fills in)
-Budget vs actual (lines, `src/` vs other):
+Budget vs actual (lines, `src/` vs other): budget 0 `src/` lines; actual 0 `src/` lines. Other: +8 lines `README.md` (new), +1 line `.gitignore` (`.DS_Store`).
 Notes:
+- Folder was not a git repo; ran `git init -b main`. Single commit `982f2ab` ("Initial exerciser project: PlatformIO config, blinky, bring-up guide"). `git status` clean; `.pio/` not tracked (0 files).
+- Tracked files: `.gitignore`, `.vscode/extensions.json`, `README.md`, `docs/bring-up-guide.md`, `docs/work-orders/WO-001-repo-setup.md`, `include/README`, `lib/README`, `platformio.ini`, `src/main.cpp`, `test/README`.
+- `.gitignore` already excluded `.pio` and the generated `.vscode/` files (`c_cpp_properties.json`, `launch.json`, `.browse.c_cpp.db*`, `ipch`). Only addition: `.DS_Store`.
+- `.vscode/extensions.json` is tracked (not generated per-machine; left as is).
+- This closing record was filled in after the commit, so the work order file in HEAD has the blank record; the edit is uncommitted and `git status` shows it modified. Commit it when ready.
+- No remote created, nothing pushed, no build or upload.
