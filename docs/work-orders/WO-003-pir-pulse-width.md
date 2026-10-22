@@ -27,9 +27,12 @@ The real PIR output goes from 0 to 3.3 V on motion and stays at 3.3 V for 2 s be
 - Scope on J2 pin 5: each pulse is 3.3 V for about 2 s, then low; 30 s between pulse starts; 10 pulses per cluster.
 - The red LED stays on for the full 2 s per pulse.
 
+- Double-wake check, with the exerciser on the counter (PIR type, `serialConnected` off, per the GCC thread): with 2 s pulses, does a woken Boron that goes back to sleep while the line is still high wake a second time? In the counter's serial log, look for two `Wake: reason=PIR` lines per pulse. Two per pulse would double-count in COUNTING mode. Record the result here (Chip, bench); no firmware change is part of this WO.
+
 ## Closing record (Claude Code fills in)
 Budget vs actual (`src/main.cpp` lines): budget 1 changed, 0 added; actual 1 changed (`PULSE_HIGH_MS` 200 -> 2000), 0 added. Also 1 line changed in `docs/work-orders/WO-002-v1-pir-pattern.md` (table row, as specified).
 Notes:
 - `pio run` (from `~/.platformio/penv/bin/pio`, not on PATH) succeeded: flash 854 bytes, RAM 8 bytes. No upload; bench verification is Chip's.
 - The pre-step commit message was reused as instructed, but `platformio.ini`, `src/main.cpp` and `bring-up-guide.md` were already committed in `5a64060`; commit `5b2ee26` therefore contains only the new WO-003 file.
 - Not pushed.
+- Double-wake verification item added after the first closing: bench-only (Chip), no firmware change, so nothing to execute here. Result still to be recorded by Chip.

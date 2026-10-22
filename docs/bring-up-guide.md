@@ -250,6 +250,8 @@ Do not upload from PlatformIO over UPDI with pymcuprog on a board that has the b
 - **Version 2, reconfigurable.** A general sketch the Boron configures over the serial connector, for example by sending target occupancy and visitation counts so the exerciser changes its interrupt cadence to match.
 - **Version 3, analog outputs.** Simulate sensors such as soil moisture with PWM through the JP1 filter on IO2. Check first whether the real sensors give a voltage, a frequency or a digital signal.
 
+Baseline run conditions (from the GCC firmware thread, 22 Oct 2026): the counter's debounce and session timers run from the rising edge of each pulse, as handled by the firmware. Awake, that is within milliseconds. Asleep, a pulse wakes the device and the wake path can wait 1 to 2 s for USB serial to re-enumerate when the `serialConnected` ledger setting is on. Times are whole RTC seconds. A session runs from the first pulse to the last pulse plus the debounce. For baseline runs, set `serialConnected` off on the test Boron so it behaves like the field.
+
 ## Gotchas from board 1
 
 - **A dead-looking board is usually EN floating.** R3 holds Q1 off until EN is pulled low, so 0 mA at first power is normal. The carrier must actively drive EN low before the exerciser answers.
