@@ -32,15 +32,15 @@ uint32_t clusterStart;                   // absolute time (millis) of the curren
 uint8_t ledPin(uint32_t pos) {
   uint32_t k = pos / PULSE_SPACING_MS, r = pos % PULSE_SPACING_MS;
   if (k < PULSES_PER_CLUSTER - 1) {                 // pulses 1 to 9
-    uint8_t c = (k == 0) ? PIN_GREEN : PIN_BLUE;
+    uint8_t c = (k == 0 && r < PULSE_HIGH_MS) ? PIN_GREEN : PIN_BLUE;
     if (r < PULSE_HIGH_MS) return c;
     if (r >= 5000 && r % 5000 < 50) return c;
     return 0;
   }
   uint32_t tl = pos - LAST_RISE_MS;                 // ms since the last rise
-  if (tl < PULSE_HIGH_MS) return PIN_RED;
-  if (tl < DEBOUNCE_MS) return (tl >= 5000 && tl % 5000 < 50) ? PIN_RED : 0;
-  if (pos >= HEARTBEAT_START_MS && r < 20) return PIN_BLUE;
+  if (tl < PULSE_HIGH_MS) return PIN_BLUE;
+  if (tl < DEBOUNCE_MS) return (tl >= 5000 && tl % 5000 < 50) ? PIN_BLUE : 0;
+  if (pos >= HEARTBEAT_START_MS && r < 20) return PIN_RED;
   return 0;
 }
 

@@ -10,6 +10,14 @@ For boards 4 and 5. Boards 1 to 3 were brought up the same way. The full detail 
 - Python 3 with pymcuprog: `python3 -m venv ~/updi-env`, then `~/updi-env/bin/pip install pymcuprog`.
 - VS Code with the PlatformIO extension, and this repo cloned.
 
+## Windows differences
+The steps below were written on a Mac. On Windows, change these (not yet tested on Windows):
+- **Port:** a COM port (for example `COM5`) instead of `/dev/cu.*`. Find it in Device Manager under Ports (COM & LPT), or in the Arduino IDE's Port menu. Windows usually installs the CH340 driver itself; if the Serial Basic doesn't appear, install SparkFun's CH340 driver.
+- **pymcuprog:** `py -m venv %USERPROFILE%\updi-env`, then `%USERPROFILE%\updi-env\Scripts\pip install pymcuprog`. Run it as `%USERPROFILE%\updi-env\Scripts\pymcuprog.exe ping -d attiny3226 -t uart -u COM5`, and the same pattern for the fuse read. In pymcuprog, `-b` is a byte count; baud is `-c`.
+- **Arduino15 folder:** with the Arduino IDE from arduino.cc it is `C:\Users\<you>\AppData\Local\Arduino15`. Check that `packages\DxCore\tools\avrdude\6.3.0-arduino17or18\bin\avrdude.exe` and `packages\megaTinyCore\hardware\megaavr\2.6.11\avrdude.conf` exist there; if the folder name differs, use what you find. The Microsoft Store version of the IDE keeps these under Documents\ArduinoData instead.
+- **`platformio.ini`:** set `upload_port = COM5` (your port) and make `upload_command` use the Windows paths above, with `avrdude.exe`. Quote the paths if your user name has spaces.
+- **Keep your path edits out of git:** after editing, run `git update-index --skip-worktree platformio.ini` so they are never committed or overwritten by a pull.
+
 ## 1. Look and power
 1. With a magnifier, check U5 for solder bridges, D1 notch at the pin 6 corner, Q1 orientation, J2/J3 seating.
 2. Unpowered, check VCC to GND and V_IN to GND are not shorted.
