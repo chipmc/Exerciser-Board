@@ -4,6 +4,10 @@ A small, low-cost test device that plugs into the same JST-SR cable as the real 
 
 ![Exerciser board](docs/images/exerciser-board.jpg)
 
+Block diagram of the interfaces (drawn from the design notes; the EDA schematic is the authority for net names):
+
+![Block diagram](docs/images/exerciser-block-diagram.png)
+
 The board is an ATtiny3226 (SSOP-20, tinyAVR 2-series) with an RGB status LED, two 3.3 V I/O lines, an enable-controlled power switch, and a serial bootloader. This repository holds the PlatformIO project, the bring-up documentation and the work orders.
 
 ## Status (22 Oct 2026)
