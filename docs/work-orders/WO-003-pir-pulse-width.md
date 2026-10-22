@@ -28,5 +28,8 @@ The real PIR output goes from 0 to 3.3 V on motion and stays at 3.3 V for 2 s be
 - The red LED stays on for the full 2 s per pulse.
 
 ## Closing record (Claude Code fills in)
-Budget vs actual (`src/main.cpp` lines):
+Budget vs actual (`src/main.cpp` lines): budget 1 changed, 0 added; actual 1 changed (`PULSE_HIGH_MS` 200 -> 2000), 0 added. Also 1 line changed in `docs/work-orders/WO-002-v1-pir-pattern.md` (table row, as specified).
 Notes:
+- `pio run` (from `~/.platformio/penv/bin/pio`, not on PATH) succeeded: flash 854 bytes, RAM 8 bytes. No upload; bench verification is Chip's.
+- The pre-step commit message was reused as instructed, but `platformio.ini`, `src/main.cpp` and `bring-up-guide.md` were already committed in `5a64060`; commit `5b2ee26` therefore contains only the new WO-003 file.
+- Not pushed.

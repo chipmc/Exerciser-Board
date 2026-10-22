@@ -23,7 +23,7 @@ Everything below comes from the GCC repo's `docs/handover/2026-10-22-exerciser-i
 | --- | --- | --- |
 | Quiet time at start | IO1 LOW for 6000 ms after `setup()` begins, then the first cluster starts | GCC wants at least 5 s after EN goes low. Power-on reset runs the sketch straight away, so 6 s gives 1 s of margin |
 | Pulses per cluster | 10 | |
-| Pulse high time | 200 ms | GCC wants 100 ms to 1 s |
+| Pulse high time | 2000 ms (changed by WO-003) | GCC wants 100 ms to 1 s; real PIR holds 2 s |
 | Spacing between pulse starts | 30 000 ms | Must be well under the 60 s debounce, and over 500 ms |
 | Cluster length | 270 000 ms (9 spacings, first to last pulse start) | |
 | Cycle length | 1 200 000 ms (20 min) measured from one cluster start to the next | Divides the hour, so every hour is identical |

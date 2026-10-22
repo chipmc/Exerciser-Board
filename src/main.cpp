@@ -6,7 +6,7 @@ const uint8_t  PIN_PULSE = PIN_PA6;      // IO1, J2 pin 5: active-high, idle LOW
 const uint8_t  PIN_LED = PIN_PC3;        // red LED mirrors each pulse
 const uint32_t QUIET_MS = 6000;          // LOW after setup() before the first cluster
 const uint8_t  PULSES_PER_CLUSTER = 10;
-const uint32_t PULSE_HIGH_MS = 200;
+const uint32_t PULSE_HIGH_MS = 2000;
 const uint32_t PULSE_SPACING_MS = 30000; // pulse start to pulse start
 const uint32_t CYCLE_MS = 1200000;       // cluster start to next cluster start (20 min)
 
