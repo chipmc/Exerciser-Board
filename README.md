@@ -10,13 +10,13 @@ Schematic (rev 1, 22 Oct 2026, CC BY-SA 4.0):
 
 The board is an ATtiny3226 (SSOP-20, tinyAVR 2-series) with an RGB status LED, two 3.3 V I/O lines, an enable-controlled power switch, and a serial bootloader. This repository holds the PlatformIO project, the bring-up documentation and the work orders.
 
-## Status (22 Oct 2026)
+## Status (23 Oct 2026)
 
 | Item | State |
 | --- | --- |
 | Boards 1, 2, 3 | Bootloader and fuses done and read back correctly (`00 00 01 FF FF FE 04 00 02`); V1 sketch uploads from PlatformIO and runs; LED sequence identical on all three. Board 3 is the test unit |
 | Boards 4, 5 | In Raleigh, to be brought up with `docs/quickstart-boards-4-5.md` |
-| V1 firmware | Written and uploaded (WO-002 to WO-006). Bench timing check, oscillator accuracy and counter integration still to do |
+| V1 firmware | Frozen as V1.1 (tag `v1.1-frozen`, 23 Oct 2026, for the GCC v45/v46 baseline). It is the WO-006 build; WO-007 changed no code. Counter readings: 569 s (Dev-14) and 570 s (Dev-09) per session, essentially the 570 s design value; pulse spacing measured 29.97 s (about 0.1% off). Power-up scope check still to do |
 | V2, V3 | Not started |
 
 ## How it works
@@ -51,7 +51,7 @@ A session runs from the first pulse until the last pulse plus the debounce (`sen
 | 300000 ms (production baseline) | 9.5 min | 28.5 min | 456 min |
 | 60000 ms (quick bench checks only) | 5.5 min | 16.5 min | 264 min |
 
-Tolerance is about ±1 s per session, because the counter credits whole seconds. The sketch's `DEBOUNCE_MS` must equal the counter's `sensor.setting1`; it is used only for the LED marker and the expected-value comment, and does not affect pulse timing.
+Tolerance is about ±1 s per session, because the counter credits whole seconds. Clean serial readings on the counter (23 Oct): 569 s (Dev-14) and 570 s (Dev-09). Two earlier sessions read 580 to 581 s while Dev-14 was on a laptop's USB; the cause is open and USB-host attachment is the lead. It is not the exerciser. The sketch's `DEBOUNCE_MS` must equal the counter's `sensor.setting1`; it is used only for the LED marker and the expected-value comment, and does not affect pulse timing.
 
 For baseline runs, set the test Boron's `serialConnected` ledger setting off so it behaves like the field.
 
@@ -147,7 +147,8 @@ Work orders are written by the architect and executed by Claude Code, with a clo
 ## Open items
 
 - Scope IO1 on board 3: 6 s quiet, 2.00 s highs, 30.0 s rise to rise, 10 pulses per cycle.
-- Oscillator accuracy: time an hour of cycles against a reference. Within 0.5% is fine for V1 (about 4.8 min over a 16 h day); beyond that, plan calibration or a crystal.
+- Oscillator accuracy: done enough for V1. The counter measured 29.97 s pulse spacing, about 0.1% (about a minute over a 16 h day), inside the 0.5% bar.
+- Power-up edge: an IO1 glitch at power-up is not suspected (the long sessions came from USB attachment). A scope check of IO1 at power-up is still worth doing once after 31 Oct, not urgent.
 - Counter integration: confirm the carrier's sensor connector maps the PIR interrupt to IO1 and the enable to EN, and check what the carrier drives on the cable pins that reach J2 pin 3 (DTR, which resets the exerciser) and pin 6 (IO2).
 - Double-wake check: with 2 s pulses, does a woken Boron wake a second time while the line is still high? Look for two `Wake: reason=PIR` log lines per pulse.
 - Explain the brief 8 mA current peaks.
