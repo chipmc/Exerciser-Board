@@ -4,9 +4,9 @@ A small, low-cost test device that plugs into the same JST-SR cable as the real 
 
 ![Exerciser board](docs/images/exerciser-board.jpg)
 
-Block diagram of the interfaces (drawn from the design notes; the EDA schematic is the authority for net names):
+Schematic (rev 1, 22 Oct 2026, CC BY-SA 4.0):
 
-![Block diagram](docs/images/exerciser-block-diagram.png)
+![Schematic](docs/images/exerciser-schematic.jpg)
 
 The board is an ATtiny3226 (SSOP-20, tinyAVR 2-series) with an RGB status LED, two 3.3 V I/O lines, an enable-controlled power switch, and a serial bootloader. This repository holds the PlatformIO project, the bring-up documentation and the work orders.
 
@@ -76,7 +76,8 @@ With the baseline debounce the session ends 570 s after the first pulse and the 
 | Power | 3.3 V on J3 pin 2 (V_IN) through a high-side P-FET switch (Q1). EN floating = off; EN tied to GND = on. A dead-looking board is usually EN floating |
 | Idle current | About 2 mA steady with the sketch running (meter reading); brief peaks to about 8 mA not yet explained |
 | LED | Common-cathode RGB (D1): red PC3, green PC2, blue PC1, HIGH = on; each channel about 2 mA, so it is only ever on briefly |
-| Reset | SW2 (manual) and DTR via a 100 nF coupling cap, both on PB4 (alternate reset pin) |
+| Reset | SW2 (manual) and DTR via C11 100 nF, both on PB4 (alternate reset pin); R1 10k with D2 (1N4148W) in parallel pulls reset up to VCC |
+| Serial | J3 RX on PB3, TX on PB2 (TTL, 3.3 V) |
 | Programming | UPDI on PA0 (Tag-Connect footprint U3) once for the bootloader and fuses; then serial through the Optiboot bootloader |
 | Not populated this spin | ESD protection (left off on purpose) |
 
